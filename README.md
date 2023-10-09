@@ -8,7 +8,8 @@ that produce BSON documents.
 
 There are cases where one might have a MongoDB query filter, update, aggregation pipeline, or
 even a document to insert into a collection, that is already in Extended JSON format, and the 
-application just needs to parse it into BSON so that it can be used with the MongoDB Java driver.
+application just needs to parse it into BSON so that it can be used with the 
+[MongoDB Java driver](https://github.com/mongodb/mongo-java-driver).
 
 If there are some keys or values in that document that vary based on program input, then a string template
 processor designed explicitly to parse Extended JSON may be useful.
@@ -19,9 +20,8 @@ this is a good time to experiment with a string template processor for Extended 
 ## Usage
 
 The `EXT_JSON` template processor processes a template conforming to a single Extended JSON document. It 
-produces a value of type `org.bson.conversions.Bson`, which can be passed as an argument to any [MongoDB
-Java driver](https://github.com/mongodb/mongo-java-driver) method that accepts a BSON document parameter, 
-such as `MongoCollection#find`.
+produces a value of type `org.bson.conversions.Bson`, which can be passed as an argument to any driver 
+method that accepts a BSON document parameter, such as `MongoCollection#find`.
 
 ```java
 import org.bson.conversions.Bson;
