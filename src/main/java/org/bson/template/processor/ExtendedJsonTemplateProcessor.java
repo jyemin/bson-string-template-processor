@@ -116,12 +116,12 @@ public final class ExtendedJsonTemplateProcessor {
                 .toList();
     }
 
-    private static BsonDocument interpolateValues(BsonDocument document, List<Object> values,
-                                                  CodecRegistry codecRegistry) {
-        return interpolateValues(document, codecRegistry, values, 0).resultValue().asDocument();
+    private record InterpolationResult(BsonValue resultValue, int numValuesInterpolated) {
     }
 
-    record InterpolationResult(BsonValue resultValue, int numValuesInterpolated) {
+    private static BsonDocument interpolateValues(BsonDocument document, List<Object> values,
+                                                  CodecRegistry codecRegistry) {
+        return interpolateValuesIntoDocument(document, codecRegistry, values, 0).resultValue().asDocument();
     }
 
     private static InterpolationResult interpolateValues(BsonValue value, CodecRegistry codecRegistry,
@@ -129,16 +129,16 @@ public final class ExtendedJsonTemplateProcessor {
         if (isSentinel(value)) {
             return new InterpolationResult(asBsonValue(getValue(values, startIndex), codecRegistry), 1);
         } else if (value.isDocument()) {
-            return interpolateValues(value.asDocument(), codecRegistry, values, startIndex);
+            return interpolateValuesIntoDocument(value.asDocument(), codecRegistry, values, startIndex);
         } else if (value.isArray()) {
-            return interpolateValues(value.asArray(), codecRegistry, values, startIndex);
+            return interpolateValuesIntoArray(value.asArray(), codecRegistry, values, startIndex);
         } else {
             return new InterpolationResult(value, 0);
         }
     }
 
-    private static InterpolationResult interpolateValues(BsonDocument document, CodecRegistry codecRegistry,
-                                                         List<Object> values, int startIndex) {
+    private static InterpolationResult interpolateValuesIntoDocument(BsonDocument document, CodecRegistry codecRegistry,
+                                                                     List<Object> values, int startIndex) {
         int numValuesInterpolated = 0;
         BsonDocument resultDocument = new BsonDocument();
         for (var entry : document.entrySet()) {
@@ -157,13 +157,13 @@ public final class ExtendedJsonTemplateProcessor {
         return new InterpolationResult(resultDocument, numValuesInterpolated);
     }
 
-    private static InterpolationResult interpolateValues(BsonArray array, CodecRegistry codecRegistry,
-                                                         List<Object> values, int startIndex) {
+    private static InterpolationResult interpolateValuesIntoArray(BsonArray array, CodecRegistry codecRegistry,
+                                                                  List<Object> values, int startIndex) {
         int numValuesInterpolated = 0;
-        for (int j = 0; j < array.size(); j++) {
-            var interpolationResult = interpolateValues(array.get(j), codecRegistry, values,
+        for (int i = 0; i < array.size(); i++) {
+            var interpolationResult = interpolateValues(array.get(i), codecRegistry, values,
                     startIndex + numValuesInterpolated);
-            array.set(j, interpolationResult.resultValue());
+            array.set(i, interpolationResult.resultValue());
             numValuesInterpolated += interpolationResult.numValuesInterpolated();
         }
         return new InterpolationResult(array, numValuesInterpolated);
@@ -171,7 +171,7 @@ public final class ExtendedJsonTemplateProcessor {
 
     private static Object getValue(List<Object> values, int index) {
         if (index >= values.size()) {
-            throw new IllegalArgumentException("Uh oh.  Looks like the string template contains the super-secret"
+            throw new IllegalArgumentException("Uh oh.  Looks like the string template contains the super-rare"
                     + " sentinel value of " + SENTINEL_AS_JSON_STRING);
         }
         return values.get(index);
