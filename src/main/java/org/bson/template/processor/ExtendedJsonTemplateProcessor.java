@@ -140,7 +140,7 @@ public final class ExtendedJsonTemplateProcessor {
     private static InterpolationResult interpolateValuesIntoDocument(BsonDocument document, CodecRegistry codecRegistry,
                                                                      List<Object> values, int startIndex) {
         int numValuesInterpolated = 0;
-        BsonDocument resultDocument = new BsonDocument();
+        BsonDocument resultDocument = new BsonDocument(document.size());
         for (var entry : document.entrySet()) {
             var keyInterpolationResult = interpolateValues(new BsonString(entry.getKey()), codecRegistry,
                     values, startIndex + numValuesInterpolated);
@@ -183,7 +183,7 @@ public final class ExtendedJsonTemplateProcessor {
             return BsonNull.VALUE;
         }
 
-        BsonDocument wrapper = new BsonDocument();
+        BsonDocument wrapper = new BsonDocument(1);
         BsonDocumentWriter writer = new BsonDocumentWriter(wrapper);
         writer.writeStartDocument();
         writer.writeName("w");
