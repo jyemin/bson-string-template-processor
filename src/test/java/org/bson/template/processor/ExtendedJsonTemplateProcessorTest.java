@@ -87,6 +87,7 @@ class ExtendedJsonTemplateProcessorTest {
     public void testSentinelDetection() {
         assertThrows(IllegalArgumentException.class,
                 () -> {
+                    @SuppressWarnings("unused")
                     var res = EXT_JSON. "{ k1: \{ 1 }, k2: \"αឮᝥᦱᜧᐆᄇ⥥℡⡅∟⹀ǖʼោ돜낉᳗ɫ⭦ᬞᎆⰴṝ⍖엔⨈ᣆⱈⵝྌ⹆\" }";
                 });
     }
